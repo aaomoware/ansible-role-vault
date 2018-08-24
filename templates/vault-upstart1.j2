@@ -1,0 +1,20 @@
+[Unit]
+Description=Vault service
+After=network-online.target
+
+[Service]
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=read-only
+SecureBits=keep-caps
+NoNewPrivileges=yes
+ExecStart=/bin/bash -ce "{{vault.home_dir}}/{{vault.home_sub_dirs.0}}/vault server -config={{vault.home_dir}}/{{vault.home_sub_dirs.2}}/vault.hcl >> {{vault.home_dir}}/{{vault.home_sub_dirs.1}}/vault.log 2>&1"
+KillSignal=SIGINT
+TimeoutStopSec=30s
+Restart=on-failure
+StartLimitInterval=60s
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target

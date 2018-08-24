@@ -1,0 +1,56 @@
+vault:
+  s3:
+    bucket:
+      - hashicorp
+      folders:
+        - vault
+        - consul
+      mode: create
+      permission: prive
+      seals:
+        file: "seals_{{ansible_hostname}}"
+  user:
+    name: vault
+    groups: ubuntu
+    comment: "vault account, password login disabled"
+  service:
+    init:
+      dir: "/lib/{{ansible_service_mgr}}/system"
+      file: vault.service
+      template: vault-upstart1.j2
+    name: vault
+    state: restarted
+    enable: true
+  unseal:
+    count: 0
+    path: "/vault/unseals/{{ansible_hostname}}"
+  pkg:
+    version: '0.9.0'
+    architecture: 'amd64'
+    link: "https://releases.hashicorp.com/vault"
+  home_dir: "/opt/vault"
+  home_sub_dirs:
+    - bin
+    - log
+    - vault.d
+    - certs
+  conf:
+    config: vault.hcl
+    template: vault.j2
+  storage:
+    address: "{{ ansible_default_ipv4['address'] }}"
+    path: "vault"
+  listener:
+    port:
+      vault: 8200
+      consul: 8500
+    address: "{{ansible_hostname}}"
+    disable_clustering: false
+    tls_disable: 1
+    tls_min_version: "tls12"
+    tls_key_file:  "certs/vault.key"
+    tls_cert_file: "certs/vault.crt"
+  cluster:
+    api_addr: "{{ansible_hostname}}"
+    cluster_addr: "{{ansible_hostname}}"
+    cluster_name: "ktech-vault"

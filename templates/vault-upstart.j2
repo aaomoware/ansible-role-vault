@@ -1,0 +1,25 @@
+# Doc: https://github.com/hashicorp/best-practices/blob/master/packer/scripts/ubuntu/upstart/vault.conf
+
+description "Vault"
+author "Hashicorp"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+
+console log
+
+script
+  if [ -f "/etc/service/vault" ]; then
+    . /etc/service/vault
+  fi
+
+  # Make sure to use all our CPUs, because Vault can block a scheduler thread
+  export GOMAXPROCS=`nproc`
+
+  exec {{vault.home_dir}}/bin/vault server \
+    -config="{{vault.home_dir}}/{{vault.home_sub_dirs.2}}/vault.hcl" \
+    \$${VAULT_FLAGS} \
+    >>{{vault.home_dir}}/{{vault.home_sub_dirs.1}}/vault.log 2>&1
+end script

@@ -1,0 +1,21 @@
+---
+- name: create groups policies
+  shell: vault policy write "{{item.group}}" "{{role_path}}/files/{{item.policy}}"
+  with_items: "{{groups}}"
+
+
+  groups:
+    - { group: admin, admin-policy.hcl }
+    - { group: provisioners, provisioner.hcl }
+    - { group: vault-admin, vault-admin-policy.hcl }
+    - { group: up-team, name: general.hcl }
+    - { group: sax-team, name: general.hcl }
+    - { group: awal-web, name: general.hcl }
+    - { group: sync-team, name: general.hcl }
+    - { group: kobaltwebdev, name: general.hcl }
+    - { group: web-platform, name: general.hcl }
+    - { group: build-release, name: general.hcl }
+    - { group: recordings-dev, name, general.hcl }
+    - { group: data-engineering, name, general.hcl}
+
+- name: create

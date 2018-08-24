@@ -1,0 +1,54 @@
+---
+- name: vault user
+  user:
+    name: "{{vault.user.name}}"
+    groups: "{{vault.user.groups}}"
+    comment: "{{vault.user.comment}}"
+
+- name: create vault dirs
+  file:
+    path: "{{vault.home_dir}}/{{item}}"
+    state: directory
+    recurse: yes
+    mode: 0755
+    owner: "{{vault.user.name}}"
+    group: "{{vault.user.name}}"
+  with_items: "{{vault.home_sub_dirs}}"
+
+- name: get/unarchive vault
+  unarchive:
+    src: "{{vault.pkg.link}}/{{vault.pkg.version}}/vault_{{vault.pkg.version}}_linux_{{vault.pkg.architecture}}.zip"
+    dest: "{{vault.home_dir}}/{{vault.home_sub_dirs.0}}"
+    creates: "{{vault.home_dir}}/{{vault.home_sub_dirs.0}}/vault"
+    owner: "{{vault.user.name}}"
+    group: "{{vault.user.name}}"
+    validate_certs: no
+    remote_src: yes
+
+- name: vault systemd
+  template:
+    src: "{{vault.service.init.template}}"
+    dest: "{{vault.service.init.dir}}/{{vault.service.init.file}}"
+    mode: 0755
+  notify: reload systemd
+- name: init_conf_check_syntax
+  shell: init-checkconf "{{vault.service.init.file}}"
+  args:
+    chdir: "{{vault.service.init.dir}}"
+  register: syntax_check
+  ignore_errors: true
+  when: "{{vault.service.type}} is defined"
+
+- meta: flush_handlers
+#- debug: msg="{{syntax_check.stdout}}"
+#  when: "{{vault.service.type}} is defined"
+
+- name: vualt conf
+  template:
+    src: "{{vault.conf.template}}"
+    dest: "{{vault.home_dir}}/{{vault.home_sub_dirs.2}}/{{vault.conf.config}}"
+    owner: "{{vault.user.name}}"
+    group: "{{vault.user.name}}"
+  notify: restart vault
+
+- meta: flush_handlers

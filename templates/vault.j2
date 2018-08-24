@@ -1,0 +1,23 @@
+storage "consul" {
+  address = "{{vault.storage.address}}:{{vault.listener.port.consul}}"
+  path    = "{{vault.storage.path}}"
+}
+
+listener "tcp" {
+  address = "127.0.0.1:{{vault.listener.port.vault}}"
+}
+
+listener "tcp" {
+  address = "{{vault.listener.address}}:{{vault.listener.port.vault}}"
+  cluster_addr = "{{vault.cluster.cluster_addr}}"
+
+  tls_disable = "{{vault.listener.tls_disable}}"
+  tls_key_file = "{{vault.home_dir}}/{{vault.home_sub_dirs.3}}/{{vault.listener.tls_key_file}}"
+  tls_cert_file = "{{vault.home_dir}}/{{vault.home_sub_dirs.3}}/{{vault.listener.tls_cert_file}}"
+  tls_min_version = "{{vault.listener.tls_min_version}}"
+}
+
+api_addr = "{{vault.cluster.api_addr}}"
+cluster_addr = "{{vault.cluster.cluster_addr}}"
+cluster_name = "{{vault.cluster.cluster_name}}"
+disable_clustering = "{{vault.cluster.disable_clustering}}"

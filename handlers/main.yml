@@ -1,0 +1,11 @@
+---
+- name: restart vault
+  service:
+    name: "{{vault.service.name}}"
+    state: "{{vault.service.state}}"
+    enabled: "{{vault.service.enable | default('yes')}}"
+
+- name: reload systemd
+  systemd:
+    name: "{{vault.service.name}}"
+    daemon_reload: yes
