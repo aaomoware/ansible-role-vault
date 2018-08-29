@@ -1,7 +1,6 @@
 ---
-- name: Create vault/consul buckets
+- name: Create vault folder
   s3:
     bucket: "{{vault.s3.bucket}}"
     mode: "{{vault.s3.mode}}"
     permission: "{{vault.s3.bucket.permission}}"
-  with_items: "{{vault.s3.bucket.folders}}"

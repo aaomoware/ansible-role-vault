@@ -1,31 +1,21 @@
 ---
-- name: already_initialized
-  shell: vault init
-  register: is_iniliallized
-  ignore_errors: true
-
 - name: initialize vault
   shell: vault init > /tmp/vault_initialize
   environment:
     VAULT_ADDR: "http://{{vault.listener.address}}:{{vault.listener.port.vault}}"
-  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"
-#  when: "Vault is already initialized" in "{{is_iniliallized}}"
 
 - name: get unseals
   shell: cat /tmp/vault_initialize | head -6 vault_initialize | awk '($1 == "Unseal") {print $4}'
   register: unseals
-  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"
 
 - name: get Root Token
   shell: cat /tmp/vault_initialize | head -6 vault_initialize | awk '($1 == "Initial") {print $4}'
   register: root_token
-  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"
 
 - debug: msg="{{item}}"
   with_items:
     - "{{unseals.stdout}}"
     - "{{root_token.stdout}}"
-  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"
 
 - name: unseal vault
   shell: vault unseal "{{item}}"
@@ -35,33 +25,29 @@
     - "{{unseals.stdout.0}}"
     - "{{unseals.stdout.1}}"
     - "{{unseals.stdout.2}}"
-  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"
 
-- name: write seals to a secured location
-  consul_kv:
-    key: "{{vault.unseals.path}}/{{vault.unseals.count | int + 1 }}"
-    value: "{{item}}"
-    state: present
-  with_items: "{{unseals.stdout}}"
-  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"
+# writing seals to consul isn't a secure...anyone which access to consul can get the seals
+#- name: write seals to consul
+#  consul_kv:
+#    key: "{{vault.unseals.path}}/{{vault.unseals.count | int + 1 }}"
+#    value: "{{item}}"
+#    state: present
+#  with_items: "{{unseals.stdout}}"
 
-- name: write seals to a secured location
+- name: a file. with seals, to write to s3
   lineinfile:
     path: "/tmp/{{vault.s3.bucket.seals.file}}"
     line: "{{item}}"
   with_items: "{{unseals.stdout}}"
-  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"
 
-- name: write seals to a secured location
+- name: write seals to a secured s3 bucket
   s3:
     bucket: "{{vault.s3.bucket}}"
     object: "{{vault.s3.bucket}}{{vault.s3.bucket.folders.0}}/{{vault.s3.bucket.seals.file}}"
     src: "/tmp/{{vault.s3.bucket.seals.file}}"
     mode: put
-  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"
 
 - name: tidy up
   file:
     path: "/tmp/{{vault.s3.bucket.seals.file}}"
     state: absent
-  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"

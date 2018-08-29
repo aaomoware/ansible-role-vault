@@ -4,7 +4,6 @@ vault:
       - hashicorp
       folders:
         - vault
-        - consul
       mode: create
       permission: prive
       seals:
@@ -56,15 +55,15 @@ vault:
     cluster_name: "ktech-vault"
 
   groups:
-    - { group: admin, admin-policy.hcl }
-    - { group: provisioners, provisioner.hcl }
-    - { group: vault-admin, vault-admin-policy.hcl }
-    - { group: up-team, name: general.hcl }
-    - { group: sax-team, name: general.hcl }
-    - { group: awal-web, name: general.hcl }
-    - { group: sync-team, name: general.hcl }
-    - { group: kobaltwebdev, name: general.hcl }
-    - { group: web-platform, name: general.hcl }
-    - { group: build-release, name: general.hcl }
+    - { group: admin, policy: admin-policy.hcl }
+    - { group: provisioners, policy: provisioner.hcl }
+    - { group: vault-admin, policy: vault-admin-policy.hcl }
+    - { group: up-team, policy: general.hcl }
+    - { group: sax-team, policy: general.hcl }
+    - { group: awal-web, policy: general.hcl }
+    - { group: sync-team, policy: general.hcl }
+    - { group: kobaltwebdev, policy: general.hcl }
+    - { group: web-platform, policy: general.hcl }
+    - { group: build-release, policy: general.hcl }
     - { group: recordings-dev, name, general.hcl }
     - { group: data-engineering, name, general.hcl}

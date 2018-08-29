@@ -1,3 +1,10 @@
 ---
+- name: already_initialized
+  shell: vault init
+  register: is_iniliallized
+  ignore_errors: true
+
 - include: vault.yml
+  when: "{{ is_iniliallized | regex_search('(Vault is already initialized)')}}"  #  OR when: "Vault is already initialized" in "{{is_iniliallized}}"
+
 - include: init.yml
